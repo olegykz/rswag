@@ -589,6 +589,29 @@ describe 'Blogs API' do
 end
 ```
 
+Multiple examples are supported by wrapping the example in an array, and supplying an example name:
+
+```ruby
+# spec/integration/blogs_spec.rb
+describe 'Blogs API' do
+
+  path '/blogs/{blog_id}' do
+
+    get 'Retrieves a blog' do
+
+      response 200, 'blog found' do
+        examples 'application/json' => [
+            'First example' => {
+                id: 1,
+                title: 'Hello world!',
+                content: '...'
+            },
+            'Second example' => { ... }
+        ]
+  ...
+end
+```
+
 
 ### Enable auto generation examples from responses ###
 

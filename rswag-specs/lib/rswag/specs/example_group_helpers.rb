@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'active_support/core_ext/hash/deep_merge'
+
 module Rswag
   module Specs
     module ExampleGroupHelpers
@@ -72,10 +74,19 @@ module Rswag
       def examples(example = nil)
         return super() if example.nil?
 
-        metadata[:response][:content] =
+        metadata[:response][:content] ||= {}
+
+        metadata[:response][:content].deep_merge!(
           example.each_with_object({}) do |(mime, example_object), memo|
-            memo[mime] = { example: example_object }
+            memo[mime] ||= {}
+            if example_object.is_a?(Hash)
+              memo[mime][:example] = example_object
+            else
+              memo[mime][:examples] ||= {}
+              memo[mime][:examples].merge! example_object.first
+            end
           end
+        )
       end
 
       def run_test!(&block)
