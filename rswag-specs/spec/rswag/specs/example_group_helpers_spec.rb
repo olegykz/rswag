@@ -145,18 +145,65 @@ module Rswag
             }
           }
         end
+        let(:json_examples) do
+          {
+            mime => [{
+                       foobar: { foo: 'bar' },
+                       barfoo: { foo: 'bat' }
+                     }]
+          }
+        end
+        let(:json_examples_two) do
+          {
+            mime => [{
+              foobat: { foo: 'bat' },
+            }]
+          }
+        end
         let(:api_metadata) { { response: {} } }
 
-        before do
-          subject.examples(json_example)
+        context "when there is one example" do
+          before { subject.examples(json_example) }
+
+          it "adds to the 'response examples' metadata" do
+            expect(api_metadata[:response][:content]).to match(
+              mime => {
+                example: { foo: 'bar' }
+              }
+            )
+          end
         end
 
-        it "adds to the 'response examples' metadata" do
-          expect(api_metadata[:response][:content]).to match(
-            mime => {
-              example: json_example[mime]
-            }
-          )
+        context "when there are multiple examples" do
+          before { subject.examples(json_examples) }
+
+          it "adds to the 'response examples' metadata" do
+            expect(api_metadata[:response][:content]).to match(
+              mime => {
+                examples: {
+                  foobar: { foo: 'bar' },
+                  barfoo: { foo: 'bat' }
+                }
+              }
+            )
+          end
+        end
+
+        context "when there are multiple invocations" do
+          before { subject.examples(json_examples) }
+          before { subject.examples(json_examples_two) }
+
+          it "adds to the 'response examples' metadata" do
+            expect(api_metadata[:response][:content]).to match(
+              mime => {
+                examples: {
+                  foobar: { foo: 'bar' },
+                  barfoo: { foo: 'bat' },
+                 foobat: { foo: 'bat' }
+                }
+              }
+            )
+          end
         end
       end
     end
